@@ -10,6 +10,11 @@
       "Ktomk\\DateiPolizei\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Ktomk\\DateiPolizei\\CliTest\\": "tests/cli"
+    }
+  },
   "require-dev": {
     "phpunit/phpunit": "^6.2"
   },

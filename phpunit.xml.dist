@@ -2,12 +2,16 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.3/phpunit.xsd"
          verbose="true"
-         bootstrap="vendor/autoload.php"
-         forceCoversAnnotation="true">
+         bootstrap="vendor/autoload.php">
 
     <testsuites>
         <testsuite name="unit">
             <directory>tests/unit</directory>
+            <file>tests/cli/XDebugHelperTest.php</file>
+            <file>tests/cli/PhpRunnerTest.php</file>
+        </testsuite>
+        <testsuite name="smoke">
+            <directory>tests/cli</directory>
         </testsuite>
     </testsuites>
 
@@ -17,8 +21,11 @@
     </logging>
 
     <filter>
-        <whitelist addUncoveredFilesFromWhitelist="true">
+        <whitelist>
             <directory suffix=".php">src</directory>
+            <!-- test-helpers -->
+            <file>tests/cli/PhpRunner.php</file>
+            <file>tests/cli/XDebugHelper.php</file>
         </whitelist>
     </filter>
 </phpunit>

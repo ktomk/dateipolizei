@@ -117,6 +117,17 @@ class ArgsTokensTest extends TestCase
 
     }
 
+    public function testConsumeArguments()
+    {
+        $tokens = ArgsTokens::createFromArgs('foo', '--option', 'arg1', 'arg2', '--', 'operand');
+        $tokens->consumeNext(ArgsTokens::T_UTILITY, true);
+        $tokens->consumeNext(ArgsTokens::T_OPTION, true);
+        $this->assertTrue($tokens->valid());
+        $expected = ['arg1', 'arg2'];
+        $actual = $tokens->consumeArguments();
+        $this->assertEquals($expected, $actual);
+    }
+
     public function testConsumeRemainingArgOps()
     {
         $tokens = ArgsTokens::createFromArgs('foo', '--option', 'argument', '--', 'operand');
