@@ -1,0 +1,255 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+namespace Ktomk\DateiPolizei\Cmd;
+
+const DAPO_NAME = 'dapo';
+
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    # source direct
+    require __DIR__ . '/../vendor/autoload.php';
+} else {
+    # required package
+    require __DIR__ . '/../../../autoload.php';
+}
+
+
+use BadMethodCallException;
+use Error;
+use Ktomk\DateiPolizei\DapoArgs as Args;
+use PHP_Timer;
+use RuntimeException;
+use Throwable;
+use UnexpectedValueException;
+
+exit(main(...$argv));
+
+function main(...$args)
+{
+    exception_handling();
+
+    $args = Args::create(__FILE__, ...$args);
+
+    $code = main_handle_args($args);
+    if (null !== $code) {
+        return $code;
+    }
+
+    $command = $args->getCommand();
+
+    if (!valid_command($command)) {
+        fprintf(
+            STDERR,
+            "%s: '%s' is not a %1\$s command. see '%s --help'\n",
+            DAPO_NAME,
+            $command,
+            $args->utility_name
+        );
+        return 1;
+    }
+
+
+    $result = call_command($args);
+
+    if ($args->print_usage_info) {
+        fputs(STDERR, PHP_Timer::resourceUsage() . "\n");
+    }
+
+    return $result;
+}
+
+function main_handle_args(Args $args): ?int
+{
+    $tokens = $args->getTokens();
+    foreach ($tokens as $offset => [$type, $argument]) {
+        /** @var $argument string */
+        switch ($type) {
+            # add: -C <path>
+            # add: --version (code feature, see sandra)
+            case $tokens::T_OPTION:
+                switch (true) {
+                    case preg_match('~^--exec-path=(.*)$~', $argument, $matches):
+                        $args->exec_path = $matches[1];
+                        $tokens->consume();
+                        break 2;
+                }
+
+                switch ($argument) {
+                    case '--help':
+                        main_help();
+                        return 0;
+
+                    case '--exec-path':
+                        echo $args->exec_path, "\n";
+                        return 0;
+
+                    case '-C':
+                        $tokens->consume();
+                        $tokens->next();
+                        if (null === $dir = $tokens->consume($tokens::T_ARGUMENT)) {
+                            return error_usage("No directory given for -C.");
+                        }
+                        if (false === @chdir($dir)) {
+                            return error_fatal(sprintf("Cannot change to '%s'", $dir));
+                        }
+                        break;
+
+                    case '--no-usage':
+                        $tokens->consume();
+                        $args->print_usage_info = false;
+                        break;
+
+                    default:
+                        return error_usage(sprintf("Unknown option: %s", $argument));
+                }
+                break;
+
+            case $tokens::T_ARGUMENT: # first argument is the command
+                return null;
+
+            default:
+                return error_usage(sprintf("Unknown: %s", $argument));
+        }
+    }
+
+    # nothing left to do
+    return null;
+}
+
+/**
+ * give fatal error message
+ *
+ * in case of an earlier php error, the description of it will be
+ * appended (e.g. file system errors).
+ *
+ * @param string $message of fatal error
+ * @return int exit status
+ */
+function error_fatal(string $message)
+{
+    $php = error_get_last()['message'];
+    if (null !== $php) {
+        $clean = preg_replace('~^(?:[a-z_]+\(\): )?(.*?)(?: \(errno \d+\))?$~i', '\\1', $php);
+        $message .= ": $clean";
+    }
+
+    fputs(STDERR, "fatal: $message\n");
+    return 128;
+}
+
+function error_usage(string $message, string $usage = null)
+{
+    fputs(STDERR, $message . "\n");
+    fputs(STDERR, $usage ?? main_usage());
+    return 129;
+}
+
+function main_usage()
+{
+    return <<<EOD
+usage: dapo [--help] [-C <path>] [--exec-path[=<path>]] [--no-usage] <command> [<args>]
+
+EOD;
+}
+
+function main_help()
+{
+    echo main_usage(), <<<EOD
+
+    --help                show help
+    -C <path>             run in <path> instead of the current working 
+                          directory
+    --exec-path[=<path>]  path where dateipolizei commands are installed; if no path is 
+                          given, will print the current setting and exit
+    --no-usage            do not print usage information
+
+EOD;
+    echo "\n\n";
+}
+
+function exception_handling()
+{
+    set_exception_handler(function (Throwable $exception) {
+        $print = function (Throwable $throwable) {
+            $label = $throwable instanceof Error ? 'error' : 'exception';
+            fprintf(
+                STDERR,
+                "%s: internal: %s('%s'): %s\n",
+                DAPO_NAME,
+                $label,
+                get_class($throwable),
+                $throwable->getMessage()
+            );
+            fputs(STDERR, "\n"."what follows is for debugging purposes.\n\n");
+            throw $throwable;
+        };
+        $print($exception);
+    });
+}
+
+function valid_command(string $command): bool
+{
+    if (!preg_match('~^[a-z]*$~i', $command)) {
+        return false;
+    }
+
+    $commandExists = file_exists(path_command($command));
+    if ("" === $command && !$commandExists) {
+        throw new RuntimeException(
+            sprintf(
+                "%s: fatal setup issue, %1\$s file not found. consult the SDK documentation, for support open an issue and report what happened",
+                DAPO_NAME
+            )
+        );
+    }
+
+    return $commandExists;
+}
+
+function path_command(string $command): string
+{
+    $execDir = __DIR__ . '/../cli/';
+
+    $command = "" === $command ? "" : "-$command";
+
+    if ($command !== strtolower($command)) {
+        $newCommand = strtolower($command);
+        fprintf(
+            STDERR,
+            "warning: malformed command name '%s', using command '%s' instead",
+            $command,
+            $newCommand
+        );
+    }
+
+    return $execDir . DAPO_NAME . $command . '.php';
+}
+
+function call_command(Args $args)
+{
+    $command = $args->getCommand();
+    $path = path_command($command);
+    if (!file_exists($path)) {
+        throw new BadMethodCallException(
+            sprintf("Non existent command '%s'", $command)
+        );
+    }
+    return require($path);
+}
+
+function working_directory(): string
+{
+    $cwd = getenv('PWD');
+
+    if (false === $cwd) {
+        $cwd = getcwd();
+    }
+
+    if (false === $cwd) {
+        throw new UnexpectedValueException(
+            'Unable to obtain working directory, please file a report with your system details'
+        );
+    }
+
+    return $cwd;
+}
