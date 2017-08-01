@@ -36,15 +36,22 @@ class PathIter
     }
 
     /**
-     * @return RRDirIter
+     * @return INodeIter
      */
     private function getIterator(): INodeIter
     {
         if (is_dir($this->path)) {
-            $dir = new RDirIter($this->path, RDirIter::SKIP_DOTS| RDirIter::UNIX_PATHS);
+            $dir = new RDirIter($this->path);
             $iter = new RRDirIter($dir, RRDirIter::SELF_FIRST);
         } elseif (is_file($this->path)) {
             $iter = new FileIter($this->path);
+        }
+
+        // FIXME(tk): what if path is neither a directory nor file
+        if (!isset($iter)) {
+            throw new \UnexpectedValueException(
+                sprintf("Internal: Unknown type of path '%s'", $this->path)
+            );
         }
 
         return $iter;

@@ -17,6 +17,12 @@ use Traversable;
  */
 interface INodeIter extends Traversable
 {
+    /**
+     * Path w/o basedir
+     *
+     * @return string
+     */
     public function getSubPathname(): string;
+
     public function current(): INode;
 }
