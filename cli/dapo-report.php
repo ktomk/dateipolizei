@@ -19,6 +19,7 @@ use Ktomk\DateiPolizei\String\PhpCsMatcher;
 /* @var $args \Ktomk\DateiPolizei\DapoArgs */
 
 $show = ShowArray::create([
+    'basename' => false,
     'dir' => true,
     'extension' => true,
     'file' => true,
@@ -125,6 +126,16 @@ foreach ($paths as $path) {
         }
 
         $report->add($node);
+
+        if ($show['basename']) {
+            return (
+                !$show->isAny('dfl')
+                || ($show['dir'] && $node->isDir())
+                || ($show['file'] && $node->isFile())
+                || ($show['link'] && $node->isLink())
+            ) ? $node->getBasename() : null;
+        }
+
         $dirFileLink = $show->areThese('dfl');
         if (!$dirFileLink && $show['extension']) {
             $extension = $node->getExtension();
@@ -175,11 +186,11 @@ function report_help()
 {
     echo report_usage(), <<<EOD
 
-    --help                show help
+    -h, --help            show help
     --show=<deflst>       list of what to show, by characters, empty to show nothing. default
                           is to show all 'deflst', can by any combination in any order of:
-                            f - files; e - extension; d - directories; l - links; s - summary;
-                            t - link targets
+                            b - basenames; d - directories; e - extension; f - files; l - links;
+                            s - summary; t - link targets
     --no-show             show nothing
     --pcre=<pattern>      filter all paths (relative/absolute to  <path>) based on PCRE
                           <pattern> which includes delimiters and modifiers
