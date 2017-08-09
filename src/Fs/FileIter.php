@@ -2,19 +2,31 @@
 
 /*
  * dateipolizei
- * 
+ *
  * Date: 25.07.17 21:06
  */
 
 namespace Ktomk\DateiPolizei\Fs;
 
+use Iterator;
 
-class FileIter implements \IteratorAggregate, INodeIter
+/**
+ * Class FileIter
+ *
+ * INodeIter of a single file-path. Useful to process input files within
+ * INode iterations.
+ */
+class FileIter implements Iterator, INodeIter
 {
     /**
      * @var string
      */
     private $path;
+
+    /**
+     * @var int
+     */
+    private $index = 0;
 
     /**
      * FileIter constructor.
@@ -31,13 +43,28 @@ class FileIter implements \IteratorAggregate, INodeIter
         return $this->path;
     }
 
+    public function rewind()
+    {
+        $this->index = 0;
+    }
+
+    public function valid(): bool
+    {
+        return 0 === $this->index;
+    }
+
+    public function key()
+    {
+        return $this->index ? null : 0;
+    }
+
     public function current(): INode
     {
         return new INode($this->path);
     }
 
-    public function getIterator()
+    public function next()
     {
-        yield $this->current();
+        $this->index || ++$this->index;
     }
 }

@@ -2,83 +2,121 @@
 
 /*
  * dateipolizei
- * 
+ *
  * Date: 22.07.17 23:17
  */
 
 namespace Ktomk\DateiPolizei;
 
-use Ktomk\DateiPolizei\Fs\FileIter;
+use Generator;
 use Ktomk\DateiPolizei\Fs\INodeIter;
-use Ktomk\DateiPolizei\Fs\RDirIter;
-use Ktomk\DateiPolizei\Fs\RRDirIter;
+use Ktomk\DateiPolizei\Fs\INodeIterFactory;
 
-class PathIter
+/**
+ * Class PathIter
+ *
+ * Default path-iteration implementation. Handles one or multiple paths
+ */
+class PathIter implements PathIterInterface
 {
     /**
-     * @var string
+     * @var string[]
      */
-    private $path;
+    private $paths;
 
     /**
      * @var callable
      */
     private $visitor;
+    /**
+     * @var INodeIterFactory
+     */
+    private $factory;
 
-    public static function create(string $path): self
+    public static function create(string ...$path): self
     {
-        return new self($path);
+        $factory = new INodeIterFactory();
+
+        return new self($factory, ...$path);
     }
 
-    private function __construct(string $path)
+    /**
+     * PathIter constructor.
+     * @param INodeIterFactory $factory
+     * @param string[] ...$paths
+     */
+    private function __construct(INodeIterFactory $factory, string ...$paths)
     {
-        $this->path = $path;
+        $this->factory = $factory;
+        $this->paths = $paths;
     }
 
     /**
      * @return INodeIter
      */
-    private function getIterator(): INodeIter
+    public function getIterator(): INodeIter
     {
-        if (is_dir($this->path)) {
-            $dir = new RDirIter($this->path);
-            $iter = new RRDirIter($dir, RRDirIter::SELF_FIRST);
-        } elseif (is_file($this->path)) {
-            $iter = new FileIter($this->path);
-        }
-
-        // FIXME(tk): what if path is neither a directory nor file
-        if (!isset($iter)) {
-            throw new \UnexpectedValueException(
-                sprintf("Internal: Unknown type of path '%s'", $this->path)
-            );
-        }
-
-        return $iter;
+        return new Fs\PathsIter($this->factory, ...$this->paths);
     }
 
-    public function visit(callable $callable)
+    public function visit(callable $callable): void
     {
         $this->visitor = $callable;
     }
 
-    public function dump()
+    /**
+     * Iterate
+     *
+     * @return Generator with return count of items yielded
+     */
+    public function iterate(): Generator
     {
         $iter = $this->getIterator();
         $count = 0;
 
-        foreach ($iter as $inode) {
+        foreach ($iter as $node) {
             if ($this->visitor) {
-                $out = call_user_func($this->visitor, $inode, $iter, $this);
+                $out = call_user_func($this->visitor, $node, $iter, $this);
             } else {
                 $out = $iter->getSubPathName();
             }
+            assert(is_null($out) || is_string($out));
+            ++$count;
+            yield $out;
+        }
+
+        return $count;
+    }
+
+    /**
+     * @return Generator with return count of strings yielded
+     */
+    public function iterateStrings(): Generator
+    {
+        $iter = $this->iterate();
+        $count = 0;
+        foreach ($iter as $out) {
             if ($out !== null) {
-                echo $out, "\n";
+                yield $out;
                 ++$count;
             }
         }
 
         return $count;
+    }
+
+    /**
+     * @return int count of output paths
+     */
+    public function dump(): int
+    {
+        $strings = $this->iterateStrings();
+        foreach ($strings as $string) {
+            echo $string, "\n";
+        }
+
+        $return = $strings->getReturn();
+        assert(is_int($return));
+        return (int) $strings->getReturn();
     }
 }
