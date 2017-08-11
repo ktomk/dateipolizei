@@ -29,6 +29,19 @@ class SmokeTest extends TestCase
             'invalid option gives 129'
         );
 
+    }
+
+    public function testReport()
+    {
+        $runner = new PhpRunner($this, 'bin/dapo');
+
         $runner->assertOk(['report', 'cli'], 'report works');
+    }
+
+    public function testExtensionsReportExcludePaths()
+    {
+        $runner = new PhpRunner($this, 'bin/dapo');
+
+        $runner->assertOk(['extensions'], 'extensions works');
     }
 }

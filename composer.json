@@ -12,7 +12,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Ktomk\\DateiPolizei\\CliTest\\": "tests/cli"
+      "Ktomk\\DateiPolizei\\CliTest\\": "tests/cli",
+      "Ktomk\\DateiPolizei\\": "tests/unit"
     }
   },
   "require-dev": {

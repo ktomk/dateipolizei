@@ -8,9 +8,17 @@
 
 namespace Ktomk\DateiPolizei;
 
-
 use Ktomk\DateiPolizei\Cli\ArgsTokens;
 
+/**
+ * Global dateipolizei arguments object for commandline arguments parsing
+ * in (CLI) application context.
+ *
+ * Public properties store global values that dapo commands can use (or are
+ * used with).
+ *
+ * TODO(tk): verbosity setting(s) when needed
+ */
 class DapoArgs
 {
     /* public properties as of dateipolizei arguments */

@@ -2,7 +2,7 @@
 
 /*
  * dateipolizei
- * 
+ *
  * Date: 22.07.17 14:50
  */
 
@@ -10,9 +10,12 @@ namespace Ktomk\DateiPolizei\Cmd;
 
 use Ktomk\DateiPolizei\Fs\INode;
 use Ktomk\DateiPolizei\Fs\INodeIter;
-use Ktomk\DateiPolizei\INodeReport;
 use Ktomk\DateiPolizei\PathIter;
+use Ktomk\DateiPolizei\Paths;
+use Ktomk\DateiPolizei\Report\INodeReport;
 use Ktomk\DateiPolizei\ShowArray;
+use Ktomk\DateiPolizei\String\CallbackMatcher;
+use Ktomk\DateiPolizei\String\Matcher;
 use Ktomk\DateiPolizei\String\PcreMatcher;
 use Ktomk\DateiPolizei\String\PhpCsMatcher;
 
@@ -27,7 +30,8 @@ $show = ShowArray::create([
     'summary' => true,
     'target' => true,
 ]);
-$paths = [$pwd = working_directory()];
+
+$paths = new Paths();
 $pcre = new PcreMatcher();
 $phpCs = new PhpCsMatcher();
 
@@ -96,68 +100,60 @@ foreach ($tokens as $offset => [$type, $argument]) {
             break;
 
         default:
-            $paths = $tokens->consumeRemainingArguments() ?? $paths;
+            $paths->set(... (array)$tokens->consumeRemainingArguments());
     }
 }
 
-foreach ($paths as $path) {
-    if (!is_dir($path) && !is_file($path)) {
-        return error_fatal(sprintf("not a file or directory: '%s'", $path));
-    }
-    if (!is_readable($path)) {
-        return error_fatal(sprintf("not readable: %s", $path));
-    }
+if ($buffer = $paths->hasUnreadable()) {
+    return error_fatal($buffer);
 }
 
 $report = new INodeReport();
-$count = 0;
 
-$accept = function($subPath) use ($pcre, $phpCs) {
+$accept = new CallbackMatcher(function($subPath) use ($pcre, $phpCs) {
     return $pcre->match($subPath)
            and $phpCs->match($subPath);
-};
+});
 
-foreach ($paths as $path) {
-    $iter = PathIter::create($path);
-    $iter->visit(function (INode $node, INodeIter $iter) use ($report, $show, $accept) {
-        $subPath = $iter->getSubPathname();
-        if (!$accept($subPath)) {
-            return null;
-        }
+$iter = PathIter::create(...$paths);
+$iter->visit(function (INode $node, INodeIter $iter) use ($report, $show, $accept) {
+    $subPath = $iter->getSubPathname();
+    if (!$accept->match($subPath)) {
+        return null;
+    }
 
-        $report->add($node);
+    $report->add($node);
 
-        if ($show['basename']) {
-            return (
-                !$show->isAny('dfl')
-                || ($show['dir'] && $node->isDir())
-                || ($show['file'] && $node->isFile())
-                || ($show['link'] && $node->isLink())
-            ) ? $node->getBasename() : null;
-        }
+    if ($show['basename']) {
+        return (
+            !$show->isAny('dfl')
+            || ($show['dir'] && $node->isDir())
+            || ($show['file'] && $node->isFile())
+            || ($show['link'] && $node->isLink())
+        ) ? $node->getBasename() : null;
+    }
 
-        $dirFileLink = $show->areThese('dfl');
-        if (!$dirFileLink && $show['extension']) {
-            $extension = $node->getExtension();
-            return strlen($extension) ? $extension : null;
-        }
+    $dirFileLink = $show->areThese('dfl');
+    if (!$dirFileLink && $show['extension']) {
+        $extension = $node->getExtension();
+        return strlen($extension) ? $extension : null;
+    }
 
-        if ($node->isLink()) {
-            return $show['link'] ? (
-                $subPath
-                . ($show['target'] ? ' -> ' . $node->getLinkTarget() : '')
-            ) : null;
-        }
-        if ($node->isDir()) {
-            return $show['dir'] ? $subPath : null;
-        }
-        if ($node->isFile()) {
-            return $show['file'] ? $subPath : null;
-        }
-        throw New \RuntimeException("internal state error");
-    });
-    $count += $iter->dump();
-}
+    if ($node->isLink()) {
+        return $show['link'] ? (
+            $subPath
+            . ($show['target'] ? ' -> ' . $node->getLinkTarget() : '')
+        ) : null;
+    }
+    if ($node->isDir()) {
+        return $show['dir'] ? $subPath : null;
+    }
+    if ($node->isFile()) {
+        return $show['file'] ? $subPath : null;
+    }
+    throw New \RuntimeException("internal state error");
+});
+$count = $iter->dump();
 
 if ($show['summary']) {
     $count && fputs(STDOUT, "---\n");

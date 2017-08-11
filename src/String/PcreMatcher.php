@@ -16,6 +16,21 @@ class PcreMatcher implements Matcher
      */
     private $patterns = [];
 
+    /**
+     * @var bool
+     */
+    private $default;
+
+    /**
+     * PcreMatcher constructor.
+     *
+     * @param bool $default [optional] matching with no patterns
+     */
+    public function __construct($default = true)
+    {
+        $this->default = $default;
+    }
+
     public static function isValid(string $pattern)
     {
         return false !== @preg_match($pattern, "");
@@ -53,6 +68,6 @@ class PcreMatcher implements Matcher
             }
         }
 
-        return $this->patterns ? false : true;
+        return $this->patterns ? false : $this->default;
     }
 }
