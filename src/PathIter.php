@@ -9,8 +9,10 @@
 namespace Ktomk\DateiPolizei;
 
 use Generator;
+use IteratorAggregate;
 use Ktomk\DateiPolizei\Fs\INodeIter;
 use Ktomk\DateiPolizei\Fs\INodeIterFactory;
+use Ktomk\DateiPolizei\String\Matcher;
 
 /**
  * Class PathIter
@@ -49,6 +51,11 @@ class PathIter implements PathIterInterface
     {
         $this->factory = $factory;
         $this->paths = $paths;
+    }
+
+    public function setIgnore(Matcher $ignore)
+    {
+        $this->factory->setIgnore($ignore);
     }
 
     /**

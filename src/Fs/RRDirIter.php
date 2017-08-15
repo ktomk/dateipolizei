@@ -2,12 +2,11 @@
 
 /*
  * dateipolizei
- * 
+ *
  * Date: 22.07.17 23:46
  */
 
 namespace Ktomk\DateiPolizei\Fs;
-
 
 use RecursiveIteratorIterator;
 
@@ -18,8 +17,16 @@ use RecursiveIteratorIterator;
  */
 class RRDirIter extends RecursiveIteratorIterator implements INodeIter
 {
-    public function __construct(RDirIter $iterator, int $mode = self::LEAVES_ONLY, int $flags = 0)
+    public function __construct(\RecursiveIterator $iterator, int $mode = self::LEAVES_ONLY, int $flags = 0)
     {
+        assert(
+            method_exists($iterator, 'getSubPathname'),
+            'light check  that iterator is RDirIter or extended'
+        );
+        assert(
+            0 === strpos(get_class($iterator), __NAMESPACE__ . '\\'),
+            'check that iterator is from within namespace'
+        );
         parent::__construct($iterator, $mode, $flags);
     }
 
@@ -30,6 +37,6 @@ class RRDirIter extends RecursiveIteratorIterator implements INodeIter
 
     public function current(): INode
     {
-        return parent::current();
+        return $this->getInnerIterator()->current();
     }
 }

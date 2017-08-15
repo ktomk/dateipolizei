@@ -47,6 +47,7 @@ class PathIterTest extends TestCase
     function testDir()
     {
         $iter = new PathIter($this->factory,__DIR__);
+        $iter->rewind();
         $subPathname = $iter->getSubPathname();
         $this->assertNotEquals(__DIR__, $subPathname);
         $this->assertFileExists(__DIR__ . '/' . $subPathname);

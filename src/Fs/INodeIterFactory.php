@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Ktomk\DateiPolizei\Fs;
 
+use Ktomk\DateiPolizei\String\Matcher;
+
 /**
  * Class INodeIterFactory
  *
@@ -19,6 +21,20 @@ namespace Ktomk\DateiPolizei\Fs;
 class INodeIterFactory
 {
     /**
+     * @var Matcher|null
+     */
+    private $ignore;
+
+    /**
+     * INodeIterFactory constructor.
+     * @param Matcher|null $ignore [optional]
+     */
+    public function __construct(Matcher $ignore = null)
+    {
+        $this->ignore = $ignore;
+    }
+
+    /**
      * @param string $path
      * @return INodeIter
      * @throws \Exception
@@ -27,6 +43,9 @@ class INodeIterFactory
     {
         if (is_dir($path)) {
             $dir = new RDirIter($path);
+            if ($this->ignore) {
+                $dir = new RIgnoreFilter($dir, $this->ignore);
+            }
             $iter = new RRDirIter($dir, RRDirIter::SELF_FIRST);
         } elseif (is_file($path)) {
             $iter = new FileIter($path);
@@ -40,5 +59,13 @@ class INodeIterFactory
         }
 
         return $iter;
+    }
+
+    /**
+     * @param Matcher|null $ignore
+     */
+    public function setIgnore(?Matcher $ignore)
+    {
+        $this->ignore = $ignore;
     }
 }
