@@ -17,25 +17,18 @@ use Ktomk\DateiPolizei\String\InPathMatcher;
 
 /* @var $args \Ktomk\DateiPolizei\DapoArgs */
 
+$ignore = $args->getIgnore();
+
 $paths = new Paths();
 
 $exclude = new InPathMatcher();
-
-// TODO(tk): (ongoing) filter common development paths (e.g. .git, vendor etc.)
-// TODO(tk): Add matcher for semicolon separated patterns, e.g. .git;.idea
-// ignored: *.hprof;*.pyc;*.pyo;*.rbc;*.yarb;*~;.DS_Store;.git;.hg;.svn;CVS;__pycache__;_svn;vssver.scc;vssver2.scc;
-// excluded: .svn;.cvs;.idea;.DS_Store;.git;.hg
-// vcs: .svn;_svn;CVS;_darcs;.arch-params;.monotone;.bzr;.git;.hg
-
+// FIXME(tk): these are superfluous but the matcher plus the functionality is nice
+// TODO(tk): patterns are used for ignore then (now), consider patterns for that matcher, too ?!
+// TODO(tk): (cont.) consider a read of .gitignore patterns -> factor out a matcher for these
 $development = [
-    'Composer json file' => 'composer.json',
-    'Composer lock file' => 'composer.lock',
-    'Composer vendor folder' => 'vendor',
-    'Git .git folder' => '.git',
-    'Github template folder' => '.github',
-    'Intellij .idea folder' => '.idea',
 ];
 $exclude->addSegments(...array_values($development));
+
 $includeDirectories = false;
 $showPaths = false;
 $noExtension = false;
@@ -52,6 +45,11 @@ foreach ($tokens as $offset => [$type, $argument]) {
                 case '--help':
                     extensions_help();
                     return 0;
+
+                case '--no-ignore':
+                    $args->getIgnore()->clearPatterns();
+                    $tokens->consume();
+                    break;
 
                 case '--show-paths':
                     $showPaths = true;
@@ -123,6 +121,7 @@ $accept = function ($subPath) use ($exclude) {
 
 
 $iter = PathIter::create(...$paths);
+$iter->setIgnore($ignore);
 $iter->visit(
     function (INode $node, INodeIter $iter)
     use ($report, $accept, $includeDirectories, $showPaths, $noExtension) {

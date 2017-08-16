@@ -2,13 +2,14 @@
 
 /*
  * dateipolizei
- * 
+ *
  * Date: 23.07.17 12:48
  */
 
 namespace Ktomk\DateiPolizei;
 
 use Ktomk\DateiPolizei\Cli\ArgsTokens;
+use Ktomk\DateiPolizei\String\PatternMatcher;
 
 /**
  * Global dateipolizei arguments object for commandline arguments parsing
@@ -39,6 +40,16 @@ class DapoArgs
      */
     private $tokens;
 
+    /**
+     * @var DapoConfig
+     */
+    private $config;
+
+    /**
+     * @var PatternMatcher Ignore pattern matcher used in the process
+     */
+    private $ignore;
+
     public static function create(string $bin, string ...$args): self
     {
         return new self($bin, ...$args);
@@ -54,6 +65,8 @@ class DapoArgs
         $this->utility_name = basename($this->utility);
 
         $this->tokens = $tokens;
+
+        $this->config = new DapoConfig();
     }
 
     public function getCommand(): string
@@ -68,5 +81,16 @@ class DapoArgs
     public function getTokens(): ArgsTokens
     {
         return $this->tokens;
+    }
+
+    /**
+     * TODO(tk): global ignore manipulating commands should chime in when this progresses on well
+     *           that is: instead of PatternMatcher some more specialized ignore object
+     *
+     * @return PatternMatcher
+     */
+    public function getIgnore(): PatternMatcher
+    {
+        return $this->ignore ?? $this->ignore = $this->config->getIgnore();
     }
 }

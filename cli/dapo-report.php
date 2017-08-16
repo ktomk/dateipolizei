@@ -21,6 +21,8 @@ use Ktomk\DateiPolizei\String\PhpCsMatcher;
 
 /* @var $args \Ktomk\DateiPolizei\DapoArgs */
 
+$ignore = $args->getIgnore();
+
 $show = ShowArray::create([
     'basename' => false,
     'dir' => true,
@@ -86,6 +88,11 @@ foreach ($tokens as $offset => [$type, $argument]) {
                     report_help();
                     return 0;
 
+                case '--no-ignore':
+                    $ignore->clearPatterns();
+                    $tokens->consume();
+                    break;
+
                 case '--no-show':
                     $show->setAll(false);
                     $tokens->consume();
@@ -116,6 +123,7 @@ $accept = new CallbackMatcher(function($subPath) use ($pcre, $phpCs) {
 });
 
 $iter = PathIter::create(...$paths);
+$iter->setIgnore($ignore);
 $iter->visit(function (INode $node, INodeIter $iter) use ($report, $show, $accept) {
     $subPath = $iter->getSubPathname();
     if (!$accept->match($subPath)) {
