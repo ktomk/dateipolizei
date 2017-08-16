@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Ktomk\DateiPolizei\Fs;
 
-use Ktomk\DateiPolizei\String\PcreMatcher;
+use Ktomk\DateiPolizei\String\Matcher\PcreMatcher;
 use PHPUnit\Framework\TestCase;
 
 class RIgnoreFilterTest extends TestCase

@@ -4,12 +4,12 @@
  * dateipolizei
  */
 
-namespace Ktomk\DateiPolizei\String;
+namespace Ktomk\DateiPolizei\String\Matcher;
 
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Ktomk\DateiPolizei\String\PcreMatcher
+ * @covers \Ktomk\DateiPolizei\String\Matcher\PcreMatcher
  */
 class PcreMatcherTest extends TestCase
 {

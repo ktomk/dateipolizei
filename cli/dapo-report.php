@@ -14,10 +14,9 @@ use Ktomk\DateiPolizei\PathIter;
 use Ktomk\DateiPolizei\Paths;
 use Ktomk\DateiPolizei\Report\INodeReport;
 use Ktomk\DateiPolizei\ShowArray;
-use Ktomk\DateiPolizei\String\CallbackMatcher;
-use Ktomk\DateiPolizei\String\Matcher;
-use Ktomk\DateiPolizei\String\PcreMatcher;
-use Ktomk\DateiPolizei\String\PhpCsMatcher;
+use Ktomk\DateiPolizei\String\Matcher\CallbackMatcher;
+use Ktomk\DateiPolizei\String\Matcher\PcreMatcher;
+use Ktomk\DateiPolizei\String\Matcher\PhpCsMatcher;
 
 /* @var $args \Ktomk\DateiPolizei\DapoArgs */
 

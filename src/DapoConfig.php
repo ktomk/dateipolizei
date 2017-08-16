@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Ktomk\DateiPolizei;
 
-use Ktomk\DateiPolizei\String\PatternMatcher;
+use Ktomk\DateiPolizei\String\Matcher\PatternMatcher;
 
 /**
  * Class DapoConfig

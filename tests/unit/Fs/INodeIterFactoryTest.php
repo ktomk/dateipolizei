@@ -8,8 +8,8 @@
 
 namespace Ktomk\DateiPolizei\Fs;
 
-use Ktomk\DateiPolizei\String\CallbackMatcher;
-use Ktomk\DateiPolizei\String\PatternMatcher;
+use Ktomk\DateiPolizei\String\Matcher\CallbackMatcher;
+use Ktomk\DateiPolizei\String\Matcher\PatternMatcher;
 use PHPUnit\Framework\TestCase;
 
 /**

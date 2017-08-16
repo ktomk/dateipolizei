@@ -8,8 +8,10 @@ declare(strict_types=1);
  * Date: 14.08.17 22:51
  */
 
-namespace Ktomk\DateiPolizei\String;
+namespace Ktomk\DateiPolizei\String\Matcher;
 
+
+use Ktomk\DateiPolizei\String\Matcher;
 
 class CallbackMatcher implements Matcher
 {

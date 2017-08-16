@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Ktomk\DateiPolizei\Fs;
 
 use Ktomk\DateiPolizei\String\Matcher;
-use Ktomk\DateiPolizei\String\PatternMatcher;
+use Ktomk\DateiPolizei\String\Matcher\PatternMatcher;
 use RecursiveFilterIterator;
 use RecursiveIterator;
 
@@ -25,7 +25,7 @@ use RecursiveIterator;
 class RIgnoreFilter extends RecursiveFilterIterator
 {
     /**
-     * @var Matcher|PatternMatcher
+     * @var Matcher|\Ktomk\DateiPolizei\String\Matcher\PatternMatcher
      */
     private $matcher;
 

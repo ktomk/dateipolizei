@@ -6,8 +6,10 @@
  * Date: 04.08.17 23:34
  */
 
-namespace Ktomk\DateiPolizei\String;
+namespace Ktomk\DateiPolizei\String\Matcher;
 
+
+use Ktomk\DateiPolizei\String\Matcher;
 
 class InPathMatcher implements Matcher
 {

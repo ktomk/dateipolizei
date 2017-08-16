@@ -9,7 +9,7 @@
 namespace Ktomk\DateiPolizei;
 
 use Ktomk\DateiPolizei\Cli\ArgsTokens;
-use Ktomk\DateiPolizei\String\PatternMatcher;
+use Ktomk\DateiPolizei\String\Matcher\PatternMatcher;
 
 /**
  * Global dateipolizei arguments object for commandline arguments parsing
@@ -87,7 +87,7 @@ class DapoArgs
      * TODO(tk): global ignore manipulating commands should chime in when this progresses on well
      *           that is: instead of PatternMatcher some more specialized ignore object
      *
-     * @return PatternMatcher
+     * @return \Ktomk\DateiPolizei\String\Matcher\PatternMatcher
      */
     public function getIgnore(): PatternMatcher
     {

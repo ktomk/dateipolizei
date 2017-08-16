@@ -4,10 +4,11 @@
  * dateipolizei
  */
 
-namespace Ktomk\DateiPolizei\String;
+namespace Ktomk\DateiPolizei\String\Matcher;
 
 
 use InvalidArgumentException;
+use Ktomk\DateiPolizei\String\Matcher;
 
 class PcreMatcher implements Matcher
 {

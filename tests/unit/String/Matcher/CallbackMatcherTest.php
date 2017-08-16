@@ -8,7 +8,7 @@ declare(strict_types=1);
  * Date: 14.08.17 22:58
  */
 
-namespace Ktomk\DateiPolizei\String;
+namespace Ktomk\DateiPolizei\String\Matcher;
 
 use PHPUnit\Framework\TestCase;
 

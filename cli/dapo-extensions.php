@@ -13,7 +13,7 @@ use Ktomk\DateiPolizei\Fs\INodeIter;
 use Ktomk\DateiPolizei\PathIter;
 use Ktomk\DateiPolizei\Paths;
 use Ktomk\DateiPolizei\Report\ExtensionReport;
-use Ktomk\DateiPolizei\String\InPathMatcher;
+use Ktomk\DateiPolizei\String\Matcher\InPathMatcher;
 
 /* @var $args \Ktomk\DateiPolizei\DapoArgs */
 

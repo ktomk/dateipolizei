@@ -6,7 +6,8 @@
  * Date: 26.07.17 18:56
  */
 
-namespace Ktomk\DateiPolizei\String;
+namespace Ktomk\DateiPolizei\String\Matcher;
+use Ktomk\DateiPolizei\String\Matcher;
 
 
 /**
