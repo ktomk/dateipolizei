@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "dateipolizei default file sets",
+    "",
+    "ignore:      directories to be ignored by default in traversal",
+    "safe-to-delete-files: ",
+    "             considered for a safe-delete command to cleanup",
+    "             these files are ignored by default"
+  ],
+  "ignore": [
+    "*~",
+    ".git",
+    ".hg",
+    ".idea",
+    ".svn",
+    "CVS",
+    "__pycache__",
+    "_svn"
+  ],
+  "safe-to-delete-files": [
+    ".DS_Store",
+    "*.exe.stackdump",
+    "*.scc",
+    "*.vssscc",
+    "*.vspscc"
+  ]
+}

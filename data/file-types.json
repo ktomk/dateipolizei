@@ -1,0 +1,12 @@
+{
+  "_comment": "dateipolizei file types",
+  "JSON": {
+    "pattern": "*.json;composer.lock"
+  },
+  "PHP": {
+    "pattern": "*.php;*.phtml;*.php4;*.php5"
+  },
+  "XML": {
+    "pattern": "*.xml;*.xml.dist;*.xslt;*.xsl;*.xsd;*.wsdl"
+  }
+}
